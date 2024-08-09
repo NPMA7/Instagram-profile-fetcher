@@ -31,7 +31,8 @@
         flex-direction: column;
         align-items: center;
         margin: 20px auto;
-        max-width: 400px;
+        min-width: 100px;
+        max-width: 250px;
       }
       #usernameForm input {
         padding: 10px;
@@ -66,11 +67,7 @@
         max-width: 600px;
         margin: auto;
       }
-      #profileJson {
-        height: 20em;
-        overflow-y: auto;
-      }
-      #profileJsonDrop {
+      #profileJson{
         height: 20em;
         overflow-y: auto;
         display: none;
@@ -111,15 +108,26 @@
         }
       }
       #skeleton {
+        padding-right: 20px;
+        padding-left: 20px;
+        padding-bottom: 10px;
+        background-color: #bcbaba;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border: 1px solid #ddd;
+        border-radius: 5px;
+
         height: 18em;
-        width: 62%;
+        margin: auto;
+        max-width: 600px;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
-        position: absolute;
       }
       #loading {
         display: none;
+        position: relative;
+        top: 5em;
       }
       #downloadButton {
         padding: 10px 20px;
@@ -161,15 +169,15 @@
     <div id="profileInfo">
       <h3>Profile Information:</h3>
       <div id="skeleton">
-        <div id="pending">
-          <p>Please input username</p>
-        </div>
         <div id="loading">
-          <div class="loader"></div>
-          <p>Loading...</p>
+          <div class="loader">
+          </div>
+          <p style="text-align: center;">Loading</p>
         </div>
+          <div id="pending">
+            <p>Please input username</p>
+          </div>
       </div>
-      <pre id="profileJsonDrop"></pre>
       <pre id="profileJson"></pre>
       <h3>View API Data:</h3>
       <a id="profileLink" href="" target="_blank"
@@ -190,16 +198,16 @@
           const username = document.getElementById("username").value;
           const profileInfoDiv = document.getElementById("profileInfo");
           const profileJsonPre = document.getElementById("profileJson");
-          const profileJsonPreDrop = document.getElementById("profileJsonDrop");
           const profileLink = document.getElementById("profileLink");
           const downloadButton = document.getElementById("downloadButton");
-          const loadingDiv = document.getElementById("loading");
+          const skeletonDiv = document.getElementById("skeleton");
           const pendingDiv = document.getElementById("pending");
+          const loadingDiv = document.getElementById("loading");
 
+          skeletonDiv.style.display = "block";
           loadingDiv.style.display = "block";
           pendingDiv.style.display = "none";
           profileJsonPre.style.display = 'none';
-          profileJsonPreDrop.style.display = 'block';
 
           const url = `/user/${username}`;
           profileLink.href = url;
@@ -222,15 +230,15 @@
             }
 
             loadingDiv.style.display = "none";
-            profileJsonPreDrop.style.display = "none";
+            skeletonDiv.style.display = "none";
             profileInfoDiv.style.display = "block";
             profileJsonPre.style.display = "block";
         } catch (error) {
             console.error("Error fetching profile data:", error);
             profileJsonPre.textContent = "Error fetching profile data.";            
             profileJsonPre.style.display = "block";
-            profileJsonPreDrop.style.display = "none";
             loadingDiv.style.display = "none";
+            skeletonDiv.style.display = "none";
             profileInfoDiv.style.display = "block";
           }
         });

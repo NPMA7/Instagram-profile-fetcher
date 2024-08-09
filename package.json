@@ -9,6 +9,7 @@
   "keywords": [
     "instagram"
   ],
+  "repositori": "https://github.com/NPMA7/instagram-profile-fetcher",
   "author": "npma",
   "license": "ISC",
   "description": "the instagram profile fetcher",
