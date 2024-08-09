@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram Profile Fetcher</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+      h1 {
+        text-align: center;
+        padding: 10px;
+        background: #007bff;
+        color: white;
+        margin: 0;
+        border-bottom: 4px solid #0056b3;
+      }
+      #usernameForm {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px auto;
+        max-width: 400px;
+      }
+      #usernameForm input {
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        width: 100%;
+      }
+      #usernameForm button {
+        padding: 10px;
+        font-size: 1em;
+        border: none;
+        border-radius: 5px;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      #usernameForm button:hover {
+        background: #0056b3;
+      }
+      #profileInfo {
+        border: 1px solid #ddd;
+        padding-right: 20px;
+        padding-left: 20px;
+        padding-bottom: 10px;
+        border-radius: 5px;
+        background-color: #fff;
+        overflow-x: auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        margin: auto;
+      }
+      #profileJson {
+        height: 20em;
+        overflow-y: auto;
+      }
+      #profileJsonDrop {
+        height: 20em;
+        overflow-y: auto;
+        display: none;
+      }
+      pre {
+        white-space: pre-wrap;
+        word-break: break-word;
+        background-color: #eee;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      a {
+        display: block;
+        margin-top: 10px;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .loader {
+        border: 8px solid #f3f3f3;
+        border-top: 8px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+        text-align: center;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      #skeleton {
+        height: 18em;
+        width: 62%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+      }
+      #loading {
+        display: none;
+      }
+      #downloadButton {
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        border-radius: 5px;
+        background: #28a745;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s;
+        display: flex;
+        align-items: center;
+      }
+      #downloadButton:hover {
+        background: #218838;
+      }
+      #downloadButton:disabled {
+        background: #d6d6d6;
+        cursor: not-allowed;
+      }
+      #downloadButton i {
+        margin-right: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Instagram Profile Fetcher</h1>
+    <form id="usernameForm">
+      <input
+        type="text"
+        id="username"
+        name="username"
+        placeholder="Enter Instagram Username"
+        required
+      />
+      <button type="submit"><i class="fas fa-search"></i> Fetch Profile</button>
+    </form>
+
+    <div id="profileInfo">
+      <h3>Profile Information:</h3>
+      <div id="skeleton">
+        <div id="pending">
+          <p>Please input username</p>
+        </div>
+        <div id="loading">
+          <div class="loader"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+      <pre id="profileJsonDrop"></pre>
+      <pre id="profileJson"></pre>
+      <h3>View API Data:</h3>
+      <a id="profileLink" href="" target="_blank"
+        ><i class="fas fa-link"></i> View Profile Data</a
+      >
+      <h3>Download Profile Picture:</h3>
+      <button id="downloadButton" disabled>
+        <i class="fas fa-download"></i> Download Profile Picture
+      </button>
+    </div>
+
+    <script>
+      document
+        .getElementById("usernameForm")
+        .addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const profileInfoDiv = document.getElementById("profileInfo");
+          const profileJsonPre = document.getElementById("profileJson");
+          const profileJsonPreDrop = document.getElementById("profileJsonDrop");
+          const profileLink = document.getElementById("profileLink");
+          const downloadButton = document.getElementById("downloadButton");
+          const loadingDiv = document.getElementById("loading");
+          const pendingDiv = document.getElementById("pending");
+
+          loadingDiv.style.display = "block";
+          pendingDiv.style.display = "none";
+          profileJsonPre.style.display = 'none';
+          profileJsonPreDrop.style.display = 'block';
+
+          const url = `/user/${username}`;
+          profileLink.href = url;
+          profileLink.textContent = `${window.location.origin}${url}`;
+
+          try {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            // Convert JSON object to pretty-printed string
+            profileJsonPre.textContent = JSON.stringify(data, null, 2);
+
+            // Enable and update the download button
+            const profilePicUrl = data.data[0].profilePicUrl;
+            if (profilePicUrl) {
+              downloadButton.dataset.url = profilePicUrl;
+              downloadButton.disabled = false;
+            } else {
+              downloadButton.disabled = true;
+            }
+
+            loadingDiv.style.display = "none";
+            profileJsonPreDrop.style.display = "none";
+            profileInfoDiv.style.display = "block";
+            profileJsonPre.style.display = "block";
+        } catch (error) {
+            console.error("Error fetching profile data:", error);
+            profileJsonPre.textContent = "Error fetching profile data.";            
+            profileJsonPre.style.display = "block";
+            profileJsonPreDrop.style.display = "none";
+            loadingDiv.style.display = "none";
+            profileInfoDiv.style.display = "block";
+          }
+        });
+
+      document
+        .getElementById("downloadButton")
+        .addEventListener("click", async () => {
+          const url = document.getElementById("downloadButton").dataset.url;
+          if (url) {
+            try {
+              // Fetch the image
+              const response = await fetch(url);
+              if (!response.ok) throw new Error("Network response was not ok");
+
+              // Create a blob from the image
+              const blob = await response.blob();
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = "profile_pic.jpg"; // Name for the downloaded file
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            } catch (error) {
+              console.error("Error downloading the image:", error);
+            }
+          }
+        });
+    </script>
+  </body>
+</html>
