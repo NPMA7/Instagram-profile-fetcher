@@ -11,7 +11,6 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
-
 // Ubah rute untuk menggunakan path parameter
 app.get("/user/:username", async (req, res) => {
   const username = req.params.username;

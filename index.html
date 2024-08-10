@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Instagram Profile Fetcher</title>
-    <link rel="icon" href="https://avatars.githubusercontent.com/u/154627997?s=48&v=4">
+    <link
+      rel="icon"
+      href="https://avatars.githubusercontent.com/u/154627997?s=48&v=4"
+    />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -67,7 +70,7 @@
         max-width: 600px;
         margin: auto;
       }
-      #profileJson{
+      #profileJson {
         height: 20em;
         overflow-y: auto;
         display: none;
@@ -115,7 +118,6 @@
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         border: 1px solid #ddd;
         border-radius: 5px;
-
         height: 18em;
         margin: auto;
         max-width: 600px;
@@ -128,6 +130,35 @@
         display: none;
         position: relative;
         top: 5em;
+      }
+      .profile-card {
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 400px;
+        margin: 0 auto;
+        text-align: center;
+        display: none;
+      }
+      .profile-pic {
+        border-radius: 50%;
+        margin-bottom: 20px;
+      }
+      .username {
+        font-weight: bold;
+        font-size: 1.5em;
+        margin-bottom: 10px;
+      }
+      .description {
+        color: #666;
+        margin-bottom: 20px;
+      }
+      .profile-link, #apiLink {
+        color: #007bff;
+        text-decoration: none;
+      }
+      .profile-link:hover, #apiLink:hover {
+        text-decoration: underline;
       }
       #downloadButton {
         padding: 10px 20px;
@@ -151,6 +182,23 @@
       #downloadButton i {
         margin-right: 8px;
       }
+
+      @media (max-width: 768px) {
+        .profile-link, #apiLink {
+          display: block;
+          margin-top: 10px;
+          word-break: break-word;
+        }
+
+        #usernameForm {
+          max-width: 100%;
+          padding: 10px;
+        }
+
+        #profileInfo {
+          padding: 10px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -170,19 +218,32 @@
       <h3>Profile Information:</h3>
       <div id="skeleton">
         <div id="loading">
-          <div class="loader">
-          </div>
-          <p style="text-align: center;">Loading</p>
+          <div class="loader"></div>
+          <p style="text-align: center">Loading</p>
         </div>
-          <div id="pending">
-            <p>Please input username</p>
-          </div>
+        <div id="pending">
+          <p>Please input username</p>
+        </div>
       </div>
-      <pre id="profileJson"></pre>
-      <h3>View API Data:</h3>
-      <a id="profileLink" href="" target="_blank"
-        ><i class="fas fa-link"></i> View Profile Data</a
+      <div class="profile-card" id="profileCard">
+        <img
+          src=""
+          alt="Profile Picture"
+          class="profile-pic"
+          id="profilePic"
+          width="100"
+          height="100"
+        />
+        <div class="username" id="username"></div>
+        <div class="description" id="description"></div>
+        <a href="" class="profile-link" id="profileLink">View Profile</a>
+      </div>
+      <h3>API Data:</h3>
+      <a id="apiLink" href="" target="_blank"
+        ><i class="fas fa-link"></i> API Data</a
       >
+      <pre id="profileJson"></pre>
+
       <h3>Download Profile Picture:</h3>
       <button id="downloadButton" disabled>
         <i class="fas fa-download"></i> Download Profile Picture
@@ -196,9 +257,11 @@
           event.preventDefault();
 
           const username = document.getElementById("username").value;
+          await fetchProfile(username);
           const profileInfoDiv = document.getElementById("profileInfo");
+          const profileCard = document.getElementById("profileCard");
           const profileJsonPre = document.getElementById("profileJson");
-          const profileLink = document.getElementById("profileLink");
+          const profileLink = document.getElementById("apiLink");
           const downloadButton = document.getElementById("downloadButton");
           const skeletonDiv = document.getElementById("skeleton");
           const pendingDiv = document.getElementById("pending");
@@ -207,7 +270,8 @@
           skeletonDiv.style.display = "block";
           loadingDiv.style.display = "block";
           pendingDiv.style.display = "none";
-          profileJsonPre.style.display = 'none';
+          profileJsonPre.style.display = "none";
+          profileCard.style.display = "none";
 
           const url = `/user/${username}`;
           profileLink.href = url;
@@ -233,16 +297,44 @@
             skeletonDiv.style.display = "none";
             profileInfoDiv.style.display = "block";
             profileJsonPre.style.display = "block";
-        } catch (error) {
+            profileCard.style.display = "block";
+          } catch (error) {
             console.error("Error fetching profile data:", error);
-            profileJsonPre.textContent = "Error fetching profile data.";            
+            profileJsonPre.textContent = "Error fetching profile data.";
             profileJsonPre.style.display = "block";
             loadingDiv.style.display = "none";
             skeletonDiv.style.display = "none";
             profileInfoDiv.style.display = "block";
+            profileCard.style.display = "block";
           }
         });
+      async function fetchProfile(username) {
+        try {
+          // Decide which URL to use based on whether a username is provided
+          const url = `/user/${username}`;
 
+          const response = await fetch(url);
+          const result = await response.json();
+
+          // Make sure there is data to work with
+          if (result.data && result.data.length > 0) {
+            const profile = result.data[0];
+
+            // Update the profile card with the fetched data
+            document.getElementById("profilePic").src = profile.profilePicUrl;
+            document.getElementById("username").textContent = profile.name;
+            document.getElementById("description").textContent =
+              profile.description;
+            document.getElementById("profileLink").href = profile.url_name;
+            document.getElementById("profileLink").textContent =
+              profile.url_name;
+          } else {
+            console.error("No profile data found");
+          }
+        } catch (error) {
+          console.error("Error fetching profile data:", error);
+        }
+      }
       document
         .getElementById("downloadButton")
         .addEventListener("click", async () => {
