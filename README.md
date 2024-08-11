@@ -2,7 +2,7 @@
 The Instagram Profile API
 
 ## Quick Documentation 
-<img alt="GIF" src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExa2IxZm55dmNoOTM4aXNlYWR1YW1uOGg5N3BzMzh4OWxxZjd1MjFhcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/s3VuvxqN0czFxdxLNp/giphy.gif" />
+<img alt="GIF" src="./instagram-profile-fetcher.gif" />
 
 ### Response Example
 > response for `@kohaku_shinba`
