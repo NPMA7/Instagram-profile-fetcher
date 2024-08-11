@@ -11,8 +11,9 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
+
 // Ubah rute untuk menggunakan path parameter
-app.get("/user/:username", async (req, res) => {
+app.get("/api/:username", async (req, res) => {
   const username = req.params.username;
   if (!username) {
     return res.status(400).send({ error: "Username is required" });

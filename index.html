@@ -153,11 +153,13 @@
         color: #666;
         margin-bottom: 20px;
       }
-      .profile-link, #apiLink {
+      .profile-link,
+      #apiLink {
         color: #007bff;
         text-decoration: none;
       }
-      .profile-link:hover, #apiLink:hover {
+      .profile-link:hover,
+      #apiLink:hover {
         text-decoration: underline;
       }
       #downloadButton {
@@ -184,7 +186,8 @@
       }
 
       @media (max-width: 768px) {
-        .profile-link, #apiLink {
+        .profile-link,
+        #apiLink {
           display: block;
           margin-top: 10px;
           word-break: break-word;
@@ -203,6 +206,7 @@
   </head>
   <body>
     <h1>Instagram Profile Fetcher</h1>
+
     <form id="usernameForm">
       <input
         type="text"
@@ -213,7 +217,6 @@
       />
       <button type="submit"><i class="fas fa-search"></i> Fetch Profile</button>
     </form>
-
     <div id="profileInfo">
       <h3>Profile Information:</h3>
       <div id="skeleton">
@@ -234,7 +237,7 @@
           width="100"
           height="100"
         />
-        <div class="username" id="username"></div>
+        <div class="username" id="usernameProfile"></div>
         <div class="description" id="description"></div>
         <a href="" class="profile-link" id="profileLink">View Profile</a>
       </div>
@@ -273,7 +276,7 @@
           profileJsonPre.style.display = "none";
           profileCard.style.display = "none";
 
-          const url = `/user/${username}`;
+          const url = `/api/${username}`;
           profileLink.href = url;
           profileLink.textContent = `${window.location.origin}${url}`;
 
@@ -308,33 +311,39 @@
             profileCard.style.display = "block";
           }
         });
-      async function fetchProfile(username) {
-        try {
-          // Decide which URL to use based on whether a username is provided
-          const url = `/user/${username}`;
+        async function fetchProfile(username) {
+  try {
+    // Memilih URL berdasarkan apakah username disediakan
+    const url = `/api/${username}`;
 
-          const response = await fetch(url);
-          const result = await response.json();
+    const response = await fetch(url);
+    const result = await response.json();
 
-          // Make sure there is data to work with
-          if (result.data && result.data.length > 0) {
-            const profile = result.data[0];
+    // Memastikan ada data untuk digunakan
+    if (result.data && result.data.length > 0) {
+      const profile = result.data[0];
 
-            // Update the profile card with the fetched data
-            document.getElementById("profilePic").src = profile.profilePicUrl;
-            document.getElementById("username").textContent = profile.name;
-            document.getElementById("description").textContent =
-              profile.description;
-            document.getElementById("profileLink").href = profile.url_name;
-            document.getElementById("profileLink").textContent =
-              profile.url_name;
-          } else {
-            console.error("No profile data found");
-          }
-        } catch (error) {
-          console.error("Error fetching profile data:", error);
-        }
-      }
+      // Tentukan URL gambar default jika `profilePicUrl` tidak tersedia atau null
+      const profilePicUrl = profile.profilePicUrl || "https://www.bing.com/th?id=OIP.9YHXM-aeJCLOUldfFewIGwAAAA&w=150&h=150&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2";
+
+      // Tentukan nama default jika `profile.name` adalah null
+      const profileName = profile.name || "undefined";
+
+      // Perbarui kartu profil dengan data yang diambil
+      document.getElementById("profilePic").src = profilePicUrl;
+      document.getElementById("usernameProfile").textContent = profileName;
+      document.getElementById("description").textContent = profile.description || "No description available";
+      document.getElementById("profileLink").href = profile.url_name || "#";
+      document.getElementById("profileLink").textContent = profile.url_name || "No URL";
+    } else {
+      console.error("No profile data found");
+    }
+  } catch (error) {
+    console.error("Error fetching profile data:", error);
+  }
+}
+
+
       document
         .getElementById("downloadButton")
         .addEventListener("click", async () => {
